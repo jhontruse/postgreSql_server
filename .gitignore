@@ -1,0 +1,29 @@
+# Archivos del sistema
+.DS_Store
+Thumbs.db
+
+# Archivos de entorno (nunca subir datos sensibles)
+.env
+*.env
+
+# Archivos temporales de Docker
+**/data/
+**/pgdata/
+**/volumes/
+**/logs/
+
+# Scripts temporales o archivos generados
+*.log
+*.bak
+*.tmp
+
+# Configuración de editores
+.vscode/
+.idea/
+*.swp
+
+# Archivos específicos de PostgreSQL
+postgresql.auto.conf
+pg_hba.conf
+postgresql.conf
+*.pid
