@@ -1,0 +1,11 @@
+# Credenciales - NUNCA subir al repositorio
+#.env
+
+# macOS
+.DS_Store
+
+# Datos y backups
+postgres_data/
+backups/
+*.dump
+*.sql.gz

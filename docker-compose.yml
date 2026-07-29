@@ -1,0 +1,65 @@
+# docker-compose.yml
+# Debe coincidir con el nombre que Compose derivaba de la carpeta
+# ("postgreSql_server" en minusculas), o apuntaria a un volumen nuevo y vacio.
+name: postgresql_server
+ 
+services:
+  postgres:
+    # Antes: "build: ." con un Dockerfile que no aportaba nada.
+    # Usar la imagen oficial directamente es mas rapido y siempre actualizada.
+    image: postgres:16-alpine
+    container_name: postgres_db
+    restart: unless-stopped
+ 
+    ports:
+      # Bind solo a localhost: el puerto NO queda expuesto a la red local.
+      # Para exponerlo a otras maquinas, cambia 127.0.0.1 por 0.0.0.0
+      - "127.0.0.1:${POSTGRES_PORT:-5432}:5432"
+ 
+    environment:
+      # Con ":?" el compose falla de inmediato y con mensaje claro si falta la
+      # variable, en vez de arrancar con valores vacios.
+      POSTGRES_DB: ${POSTGRES_DB:?falta POSTGRES_DB en .env}
+      POSTGRES_USER: ${POSTGRES_USER:?falta POSTGRES_USER en .env}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?falta POSTGRES_PASSWORD en .env}
+      # scram-sha-256 es el metodo de autenticacion moderno (default desde PG 14)
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --auth-host=scram-sha-256"
+      TZ: ${TZ:-America/Lima}
+      PGTZ: ${TZ:-America/Lima}
+ 
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init-scripts:/docker-entrypoint-initdb.d:ro
+ 
+    healthcheck:
+      # CORREGIDO: antes apuntaba a "appuser"/"appdb", que no existen en esta
+      # configuracion, por lo que el contenedor nunca llegaba a estado healthy.
+      # El doble "$$" es un escape de Compose: llega como "$" al shell del contenedor.
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+ 
+    # Postgres necesita cerrar limpio para no entrar en recovery al reiniciar
+    stop_grace_period: 30s
+ 
+    # /dev/shm por defecto son 64MB: insuficiente para queries en paralelo
+    shm_size: 256m
+ 
+    # Sin esto los logs crecen sin limite hasta llenar el disco
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+ 
+    deploy:
+      resources:
+        limits:
+          memory: ${POSTGRES_MEM_LIMIT:-2g}
+ 
+volumes:
+  postgres_data:
+    driver: local
+ 
