@@ -1,5 +1,5 @@
 # Credenciales - NUNCA subir al repositorio
-#.env
+.env
 
 # macOS
 .DS_Store
