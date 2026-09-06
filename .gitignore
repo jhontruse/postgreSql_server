@@ -1,6 +1,5 @@
 # Credenciales - NUNCA subir al repositorio
 .env
-MANUAL_CONEXION.md
 
 # macOS
 .DS_Store

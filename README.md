@@ -147,38 +147,6 @@ docker exec -i postgres_db psql -U $POSTGRES_USER -d $POSTGRES_DB < init-scripts
 
 ---
 
-## Flujo local → Supabase
-
-Este proyecto usa Supabase como copia en la nube de la base local. El flujo es:
-
-1. **Desarrolla en local**: conéctate al contenedor y crea/modifica tablas dentro de
-   `db_biblioteca` o `db_gym` (o cualquier esquema propio) como quieras.
-2. **Publica con un comando:**
-
-   ```bash
-   ./scripts/deploy_supabase.sh
-   ```
-
-   Esto hace `pg_dump` **solo** de los esquemas propios (nunca de `public` ni de los
-   esquemas internos de Supabase como `auth`, `storage`, `extensions`), guarda un
-   respaldo con fecha en `./backups/`, y restaura ese dump contra Supabase con
-   `--clean --if-exists`, reemplazando por completo esos esquemas allá.
-
-3. **Requisito:** el `.env` debe tener `SUPABASE_DB_URL` con el connection string de
-   tipo **Session pooler** de tu proyecto (Supabase dashboard → botón **Connect**).
-
-> ⚠️ **El despliegue reemplaza los datos en Supabase con los de local**, no los
-> combina. Este flujo asume que Supabase es un espejo de la base local — si algún
-> día Supabase tiene datos propios de usuarios reales que no vengan de local (por
-> ejemplo, una app en producción escribiendo directo ahí), dejar de usar este script
-> tal cual y pasar a migraciones incrementales (`ALTER TABLE ADD COLUMN`, etc.) que
-> nunca borren nada.
->
-> Para agregar más esquemas al despliegue, edita el arreglo `SCHEMAS` al inicio de
-> `scripts/deploy_supabase.sh`.
-
----
-
 ## Backups
 
 **Exportar:**
