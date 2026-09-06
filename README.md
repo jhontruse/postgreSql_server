@@ -133,13 +133,17 @@ automáticamente, en orden alfabético, **solo la primera vez** que se crea la b
 
 ```
 init-scripts/
-├── 01_schemas.sql
-├── 02_tables.sql
-└── 03_seed_data.sql
+└── 01_schemas.sql   # crea los esquemas db_biblioteca y db_gym
 ```
 
-Numera los archivos para garantizar el orden. En una base ya existente no se ejecutan:
-hay que recrear el volumen o aplicarlos a mano.
+Numera los archivos para garantizar el orden (por ejemplo, un futuro `02_tables.sql`
+con las tablas de cada esquema). En una base ya existente no se ejecutan: hay que
+recrear el volumen (`docker compose down -v`, borra los datos) o aplicarlos a mano
+contra el contenedor ya corriendo:
+
+```bash
+docker exec -i postgres_db psql -U $POSTGRES_USER -d $POSTGRES_DB < init-scripts/01_schemas.sql
+```
 
 ---
 
